@@ -1,0 +1,1 @@
+Add .well-known configuration support for tile server and map styles.

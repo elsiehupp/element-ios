@@ -46,7 +46,7 @@ enum LocationSharingViewModelResult {
 
 @available(iOS 14, *)
 struct LocationSharingViewState: BindableState {
-    let tileServerMapURL: URL
+    let mapStyleURL: URL
     let avatarData: AvatarInputProtocol
     let location: CLLocationCoordinate2D?
     
