@@ -54,7 +54,8 @@ final class OnboardingCoordinator: NSObject, OnboardingCoordinatorProtocol {
         parameters.router
     }
     private var splashScreenResult: OnboardingSplashScreenViewModelResult?
-    private weak var authenticationCoordinator: AuthenticationCoordinatorProtocol?
+    private var authenticationCoordinator: AuthenticationCoordinatorProtocol?
+    private var isShowingAuthentication = false
     
     // MARK: Public
 
@@ -75,7 +76,8 @@ final class OnboardingCoordinator: NSObject, OnboardingCoordinatorProtocol {
         // TODO: Manage a separate flow for soft logout that just uses AuthenticationCoordinator
         if #available(iOS 14.0, *), parameters.softLogoutCredentials == nil, BuildSettings.authScreenShowRegister {
             showSplashScreen()
-            preloadAuthentication()
+            // Preload the authentication view controller to avoid a delay during its presentation
+            authenticationCoordinator = AuthenticationCoordinator()
         } else {
             showAuthenticationScreen()
         }
@@ -128,14 +130,9 @@ final class OnboardingCoordinator: NSObject, OnboardingCoordinatorProtocol {
         showAuthenticationScreen()
     }
     
-    /// Preload the authentication view controller to avoid a delay during its presentation
-    private func preloadAuthentication() {
-        AuthenticationCoordinator.preload()
-    }
-    
     /// Show the authentication screen. Any parameters that have been set in previous screens are be applied.
     private func showAuthenticationScreen() {
-        guard authenticationCoordinator == nil else { return }
+        guard !isShowingAuthentication, let authenticationCoordinator = authenticationCoordinator else { return }
         
         MXLog.debug("[OnboardingCoordinator] showAuthenticationScreen")
         
@@ -143,31 +140,32 @@ final class OnboardingCoordinator: NSObject, OnboardingCoordinatorProtocol {
                                                              externalRegistrationParameters: externalRegistrationParameters,
                                                              softLogoutCredentials: parameters.softLogoutCredentials)
         
-        let coordinator = AuthenticationCoordinator(parameters: parameters)
-        coordinator.completion = { [weak self, weak coordinator] in
-            guard let self = self, let coordinator = coordinator else { return }
-            self.authenticationCoordinatorDidComplete(coordinator)
+        authenticationCoordinator.completion = { [weak self, weak authenticationCoordinator] in
+            guard let self = self, let authenticationCoordinator = authenticationCoordinator else { return }
+            self.authenticationCoordinatorDidComplete(authenticationCoordinator)
         }
         
-        coordinator.start()
-        add(childCoordinator: coordinator)
-        authenticationCoordinator = coordinator
+        authenticationCoordinator.start(with: parameters)
+        add(childCoordinator: authenticationCoordinator)
         
         if customHomeserver != nil || customIdentityServer != nil {
-            coordinator.updateHomeserver(customHomeserver, andIdentityServer: customIdentityServer)
+            authenticationCoordinator.updateHomeserver(customHomeserver, andIdentityServer: customIdentityServer)
         }
         
         if self.navigationRouter.modules.isEmpty {
-            self.navigationRouter.setRootModule(coordinator, popCompletion: nil)
+            self.navigationRouter.setRootModule(authenticationCoordinator, popCompletion: nil)
         } else {
-            self.navigationRouter.push(coordinator, animated: true) { [weak self] in
-                self?.remove(childCoordinator: coordinator)
+            self.navigationRouter.push(authenticationCoordinator, animated: true) { [weak self] in
+                self?.remove(childCoordinator: authenticationCoordinator)
+                self?.isShowingAuthentication = false
             }
         }
+        
+        isShowingAuthentication = true
     }
     
     /// Displays the next view in the flow after the authentication screen.
-    private func authenticationCoordinatorDidComplete(_ coordinator: AuthenticationCoordinator) {
+    private func authenticationCoordinatorDidComplete(_ coordinator: AuthenticationCoordinatorProtocol) {
         completion?()
     }
 }

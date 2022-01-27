@@ -22,6 +22,8 @@ import Foundation
 protocol AuthenticationCoordinatorProtocol: Coordinator, Presentable {
     var completion: (() -> Void)? { get set }
     
+    func start(with parameters: AuthenticationCoordinatorParameters)
+    
     /// Force a registration process based on a predefined set of parameters from a server provisioning link.
     /// For more information see `AuthenticationViewController.externalRegistrationParameters`.
     func update(externalRegistrationParameters: [AnyHashable: Any])

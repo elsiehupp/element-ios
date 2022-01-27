@@ -37,7 +37,7 @@ final class AuthenticationCoordinator: NSObject, AuthenticationCoordinatorProtoc
     
     // MARK: Private
     
-    private let parameters: AuthenticationCoordinatorParameters
+    private var parameters: AuthenticationCoordinatorParameters?
     private let authenticationViewController: AuthenticationViewController
     
     // MARK: Public
@@ -48,11 +48,12 @@ final class AuthenticationCoordinator: NSObject, AuthenticationCoordinatorProtoc
     
     // MARK: - Setup
     
-    init(parameters: AuthenticationCoordinatorParameters) {
-        self.parameters = parameters
-        
+    override init() {
         let authenticationViewController = AuthenticationViewController()
         self.authenticationViewController = authenticationViewController
+        
+        // Preload the view to avoid locking up the UI immediately before presentation.
+        authenticationViewController.loadViewIfNeeded()
         
         super.init()
     }
@@ -60,6 +61,12 @@ final class AuthenticationCoordinator: NSObject, AuthenticationCoordinatorProtoc
     // MARK: - Public
     
     func start() {
+        fatalError("Not implemented, use start(with:)")
+    }
+    
+    func start(with parameters: AuthenticationCoordinatorParameters) {
+        self.parameters = parameters
+        
         // Listen to the end of the authentication flow
         authenticationViewController.authVCDelegate = self
         
@@ -92,12 +99,6 @@ final class AuthenticationCoordinator: NSObject, AuthenticationCoordinatorProtoc
     /// When SSO login succeeded, when SFSafariViewController is used, continue login with success parameters.
     func continueSSOLogin(withToken loginToken: String, transactionID: String) -> Bool {
         authenticationViewController.continueSSOLogin(withToken: loginToken, txnId: transactionID)
-    }
-    
-    /// Preload `AuthenticationViewController` from it's xib file to avoid locking up the UI when before presentation.
-    static func preload() {
-        let authenticationViewController = AuthenticationViewController()
-        authenticationViewController.loadViewIfNeeded()
     }
 }
 
