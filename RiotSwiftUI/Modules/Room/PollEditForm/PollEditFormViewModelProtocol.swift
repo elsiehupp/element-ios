@@ -16,15 +16,15 @@
 
 import Foundation
 
-protocol LocationSharingViewModelProtocol {
-    var completion: ((LocationSharingViewModelResult) -> Void)? { get set }
+protocol PollEditFormViewModelProtocol {
+    var completion: ((PollEditFormViewModelResult) -> Void)? { get set }
     
     func startLoading()
-    func stopLoading(error: LocationSharingErrorAlertInfo.AlertType?)
+    func stopLoading(errorAlertType: PollEditFormErrorAlertInfo.AlertType?)
 }
 
-extension LocationSharingViewModelProtocol {
+extension PollEditFormViewModelProtocol {
     func stopLoading() {
-        stopLoading(error: nil)
+        stopLoading(errorAlertType: nil)
     }
 }

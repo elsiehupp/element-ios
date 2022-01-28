@@ -87,7 +87,7 @@ final class LocationSharingCoordinator: Coordinator, Presentable {
                     guard let self = self else { return }
                     
                     MXLog.error("[LocationSharingCoordinator] Failed sharing location with error: \(String(describing: error))")
-                    self.locationSharingViewModel.stopLoading(error: error)
+                    self.locationSharingViewModel.stopLoading(error: .locationSharingError)
                 }
             }
             

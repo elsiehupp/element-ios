@@ -21,7 +21,7 @@ import CoreLocation
 @available(iOS 14, *)
 typealias LocationSharingViewModelType = StateStoreViewModel<LocationSharingViewState,
                                                              LocationSharingStateAction,
-                                                             LocationSharingViewAction >
+                                                             LocationSharingViewAction>
 @available(iOS 14, *)
 class LocationSharingViewModel: LocationSharingViewModelType, LocationSharingViewModelProtocol {
     
@@ -72,11 +72,11 @@ class LocationSharingViewModel: LocationSharingViewModelType, LocationSharingVie
         state.showLoadingIndicator = true
     }
     
-    public func stopLoading(error: Error? = nil) {
+    func stopLoading(error: LocationSharingErrorAlertInfo.AlertType?) {
         state.showLoadingIndicator = false
-
-        if error != nil {
-            state.bindings.alertInfo = LocationSharingErrorAlertInfo(id: .locationSharingError,
+        
+        if let error = error {
+            state.bindings.alertInfo = LocationSharingErrorAlertInfo(id: error,
                                                                      title: VectorL10n.locationSharingPostFailureTitle,
                                                                      subtitle: VectorL10n.locationSharingPostFailureSubtitle(AppInfo.current.displayName),
                                                                      primaryButton: (VectorL10n.ok, nil))
