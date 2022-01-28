@@ -19,29 +19,24 @@ import SwiftUI
 import Combine
 import CoreLocation
 
-enum LocationSharingViewError {
-    case failedLoadingMap
-    case failedLocatingUser
-    case invalidLocationAuthorization
-    case failedSharingLocation
-}
-
-enum LocationSharingStateAction {
-    case error(LocationSharingViewError, LocationSharingViewModelCallback?)
-    case startLoading
-    case stopLoading(Error?)
-}
+// Remove after StateStoreViewModel no longer requires it
+enum LocationSharingStateAction { }
 
 enum LocationSharingViewAction {
     case cancel
     case share
 }
 
-typealias LocationSharingViewModelCallback = ((LocationSharingViewModelResult) -> Void)
-
 enum LocationSharingViewModelResult {
     case cancel
     case share(latitude: Double, longitude: Double)
+}
+
+enum LocationSharingViewError {
+    case failedLoadingMap
+    case failedLocatingUser
+    case invalidLocationAuthorization
+    case failedSharingLocation
 }
 
 @available(iOS 14, *)
@@ -80,6 +75,7 @@ struct LocationSharingErrorAlertInfo: Identifiable {
     
     let id: AlertType
     let title: String
+    var subtitle: String? = nil
     let primaryButton: (title: String, action: (() -> Void)?)
-    let secondaryButton: (title: String, action: (() -> Void)?)?
+    var secondaryButton: (title: String, action: (() -> Void)?)? = nil
 }
