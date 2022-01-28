@@ -16,12 +16,23 @@
 
 import Foundation
 
-@available(iOS 14, *)
-protocol UserSuggestionViewModelProtocol {
-    
-    static func makeUserSuggestionViewModel(userSuggestionService: UserSuggestionServiceProtocol) -> UserSuggestionViewModelProtocol
-    
-    var context: UserSuggestionViewModelType.Context { get }
-    
-    var completion: ((UserSuggestionViewModelResult) -> Void)? { get set }
+// Remove after StateStoreViewModel no longer requires it
+enum UserSuggestionStateAction { }
+
+enum UserSuggestionViewAction {
+    case selectedItem(UserSuggestionViewStateItem)
+}
+
+enum UserSuggestionViewModelResult {
+    case selectedItemWithIdentifier(String)
+}
+
+struct UserSuggestionViewStateItem: Identifiable {
+    let id: String
+    let avatar: AvatarInputProtocol?
+    let displayName: String?
+}
+
+struct UserSuggestionViewState: BindableState {
+    var items: [UserSuggestionViewStateItem]
 }
