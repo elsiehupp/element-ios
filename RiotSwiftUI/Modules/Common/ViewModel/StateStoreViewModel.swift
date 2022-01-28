@@ -92,9 +92,9 @@ class StateStoreViewModel<State: BindableState, StateAction, ViewAction> {
     /// Constrained interface for passing to Views.
     var context: Context
     
-    /// State can be read  within the 'ViewModel' but not modified outside of the reducer.
     var state: State {
-        context.viewState
+        get { context.viewState }
+        set { context.viewState = newValue }
     }
     
     // MARK: Setup
