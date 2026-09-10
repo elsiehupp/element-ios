@@ -117,36 +117,22 @@ class VectorWellKnownTests: XCTestCase {
         }
     }
     
-    func testMigrationBannerParsingInvalidEnabledValueInvalidatesSection() {
+    func testMigrationBannerParsingInvalidEnabledValueFails() {
         let wellKnownDictionary: [String: Any] = [
             "io.element.migration_banner": [
                 "enabled": "false"
             ]
         ]
         
-        do {
-            let vectorWellKnown: VectorWellKnown = try SerializationService().deserialize(wellKnownDictionary)
-            XCTAssertNil(vectorWellKnown.migrationBanner)
-        } catch {
-            XCTFail("Fail with error: \(error)")
-        }
+        XCTAssertThrowsError(try SerializationService().deserialize(wellKnownDictionary) as VectorWellKnown)
     }
     
-    func testMigrationBannerParsingInvalidSectionDoesNotBreakOtherSections() {
+    func testMigrationBannerParsingInvalidSectionFails() {
         let wellKnownDictionary: [String: Any] = [
-            "io.element.e2ee": [
-                "default": false
-            ],
             "io.element.migration_banner": "not an object"
         ]
         
-        do {
-            let vectorWellKnown: VectorWellKnown = try SerializationService().deserialize(wellKnownDictionary)
-            XCTAssertNil(vectorWellKnown.migrationBanner)
-            XCTAssertEqual(vectorWellKnown.encryption?.isE2EEByDefaultEnabled, false)
-        } catch {
-            XCTFail("Fail with error: \(error)")
-        }
+        XCTAssertThrowsError(try SerializationService().deserialize(wellKnownDictionary) as VectorWellKnown)
     }
     
     func testVectorWellKnownParsingMissingKey() {

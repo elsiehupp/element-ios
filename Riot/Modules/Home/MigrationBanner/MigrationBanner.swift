@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A banner inviting the user to migrate to Element X, displayed at the top of the room list.
+/// A banner inviting the user to migrate to the new app, displayed at the top of the room list.
 struct MigrationBanner: View {
     @Environment(\.theme) private var theme: ThemeSwiftUI
     

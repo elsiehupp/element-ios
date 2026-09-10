@@ -468,7 +468,6 @@ final class BuildSettings: NSObject {
     /// The date from which the migration banner is displayed when the homeserver Well Known has no
     /// `io.element.migration_banner` section. Before this date, a missing section hides the banner.
     /// When the section is present, its `enabled` value is always used instead.
-    /// Note: this date must be kept in sync with Element Android.
     static let migrationBannerShowWhenNotConfiguredStartDate = DateComponents(calendar: Calendar(identifier: .gregorian),
                                                                               timeZone: TimeZone(secondsFromGMT: 0),
                                                                               year: 2026,

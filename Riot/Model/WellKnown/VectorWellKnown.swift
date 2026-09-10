@@ -31,16 +31,6 @@ extension VectorWellKnown: Decodable {
         case deprecatedEncryption = "im.vector.riot.e2ee"
         case deprecatedJitsi = "im.vector.riot.jitsi"
     }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        encryption = try container.decodeIfPresent(VectorWellKnownEncryptionConfiguration.self, forKey: .encryption)
-        jitsi = try container.decodeIfPresent(VectorWellKnownJitsiConfiguration.self, forKey: .jitsi)
-        deprecatedEncryption = try container.decodeIfPresent(VectorWellKnownEncryptionConfiguration.self, forKey: .deprecatedEncryption)
-        deprecatedJitsi = try container.decodeIfPresent(VectorWellKnownJitsiConfiguration.self, forKey: .deprecatedJitsi)
-        // A malformed migration banner section (e.g. not a JSON object) must not prevent the other sections from being parsed.
-        migrationBanner = try? container.decodeIfPresent(VectorWellKnownMigrationBannerConfiguration.self, forKey: .migrationBanner)
-    }
 }
 
 // MARK: - Encryption
@@ -86,7 +76,7 @@ struct VectorWellKnownJitsiConfiguration: Decodable {
 // MARK: - Migration Banner
 
 /// Raw content of the `io.element.migration_banner` Well Known section, used to configure the banner
-/// inviting users to migrate to Element X.
+/// inviting users to migrate to the new app.
 ///
 /// The resolution of the default values is done by `HomeserverConfigurationBuilder`.
 struct VectorWellKnownMigrationBannerConfiguration: Decodable {

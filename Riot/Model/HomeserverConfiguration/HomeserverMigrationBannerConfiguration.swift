@@ -8,7 +8,7 @@
 import Foundation
 
 /// `HomeserverMigrationBannerConfiguration` gives the resolved configuration of the banner inviting users
-/// to migrate to Element X, based on the `io.element.migration_banner` Well Known section and the default values.
+/// to migrate to the new app, based on the `io.element.migration_banner` Well Known section and the default values.
 @objcMembers
 final class HomeserverMigrationBannerConfiguration: NSObject {
     /// Indicate if the banner is enabled for this homeserver.

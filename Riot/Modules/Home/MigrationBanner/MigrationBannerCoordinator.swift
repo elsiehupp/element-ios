@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-/// Decides when the banner inviting users to migrate to Element X is displayed at the top of the room list,
+/// Decides when the banner inviting users to migrate to the new app is displayed at the top of the room list,
 /// based on the homeserver Well Known configuration (see `HomeserverMigrationBannerConfiguration`).
 ///
 /// The Well Known is refreshed by the SDK at every session start without any notification, so the banner is

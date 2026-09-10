@@ -8,13 +8,13 @@
 import StoreKit
 import UIKit
 
-/// Presents the App Store page of a replacement app (Element X by default), so the user can download it.
+/// Presents the App Store page of the app replacing this one, so the user can download it.
 enum ReplacementAppStorePresenter {
     /// Presents the App Store page of the app with the given App Store ID as a sheet.
     /// Falls back to opening the App Store URL outside of the app if the in-app page can't be shown.
     ///
     /// - Parameters:
-    ///   - appStoreID: The App Store ID (a.k.a. iTunes item identifier) of the app, e.g. `1631335820` for Element X.
+    ///   - appStoreID: The App Store ID (a.k.a. iTunes item identifier) of the app.
     ///   - presenter: The view controller used to present the sheet.
     @MainActor static func presentStorePage(appStoreID: String, from presenter: UIViewController) async {
         do {
