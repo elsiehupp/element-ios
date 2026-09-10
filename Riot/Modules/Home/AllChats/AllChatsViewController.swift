@@ -799,11 +799,48 @@ extension AllChatsViewController: SpaceMembersCoordinatorDelegate {
 
 // MARK: - BannerPresentationProtocol
 extension AllChatsViewController: BannerPresentationProtocol {
-    func presentBannerView(_ bannerView: UIView, animated: Bool) {
+    /// The priority of the banners sharing the single banner slot. A banner never replaces a banner with a higher priority.
+    private enum BannerPriority: Int, Comparable {
+        case versionCheck
+        case migration
+        case verificationRequired
+        
+        init(bannerView: UIView) {
+            switch bannerView {
+            case is VerificationRequiredBannerView:
+                self = .verificationRequired
+            case is MigrationBannerView:
+                self = .migration
+            default:
+                self = .versionCheck
+            }
+        }
+        
+        static func < (lhs: BannerPriority, rhs: BannerPriority) -> Bool {
+            lhs.rawValue < rhs.rawValue
+        }
+    }
+    
+    @discardableResult
+    func presentBannerView(_ bannerView: UIView, animated: Bool) -> Bool {
+        if let currentBannerView = self.bannerView, BannerPriority(bannerView: bannerView) < BannerPriority(bannerView: currentBannerView) {
+            MXLog.debug("[AllChatsViewController] presentBannerView: a banner with a higher priority is already displayed.")
+            return false
+        }
+        
         self.bannerView = bannerView
+        return true
     }
     
     func dismissBannerView(animated: Bool) {
+        self.bannerView = nil
+    }
+    
+    func dismissBannerView(_ bannerView: UIView, animated: Bool) {
+        guard self.bannerView === bannerView else {
+            return
+        }
+        
         self.bannerView = nil
     }
 }
@@ -849,7 +886,8 @@ extension AllChatsViewController: SplitViewMasterViewControllerProtocol {
     }
     
     func presentVerificationRequiredBanner(with session: MXSession) {
-        guard bannerView == nil, VerificationRequiredBannerChecker().canShowBanner(for: session) else {
+        // The verification banner has the highest priority: it can replace any other banner, but must not be presented twice.
+        guard !(bannerView is VerificationRequiredBannerView), VerificationRequiredBannerChecker().canShowBanner(for: session) else {
             return
         }
         
