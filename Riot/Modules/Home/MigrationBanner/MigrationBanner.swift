@@ -15,7 +15,8 @@ struct MigrationBanner: View {
     let message: String
     let buttonTitle: String
     let downloadAction: () -> Void
-    
+    let closeAction: () -> Void
+
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
             HStack(alignment: .top, spacing: 16) {
@@ -24,12 +25,25 @@ struct MigrationBanner: View {
                     .frame(width: 48, height: 48)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .accessibilityHidden(true)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(theme.fonts.headline)
-                        .foregroundStyle(theme.colors.primaryContent)
-                    
+                    HStack(alignment: .top, spacing: 4) {
+                        Text(title)
+                            .font(theme.fonts.headline)
+                            .foregroundStyle(theme.colors.primaryContent)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button(action: closeAction) {
+                            Image(Asset.Images.closeBanner.name)
+                                .renderingMode(.template)
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                                .foregroundStyle(theme.colors.secondaryContent)
+                        }
+                        .accessibilityLabel(VectorL10n.close)
+                        .accessibilityIdentifier("migrationBannerCloseButton")
+                    }
+
                     Text(message)
                         .font(theme.fonts.subheadline)
                         .foregroundStyle(theme.colors.secondaryContent)
@@ -59,13 +73,17 @@ struct MigrationBanner_Previews: PreviewProvider {
     static var previews: some View {
         MigrationBanner(title: VectorL10n.migrationBannerTitle,
                         message: VectorL10n.migrationBannerBody,
-                        buttonTitle: VectorL10n.migrationBannerDownloadButton) { }
+                        buttonTitle: VectorL10n.migrationBannerDownloadButton,
+                        downloadAction: { },
+                        closeAction: { })
             .theme(.light)
             .previewDisplayName("Light")
-        
+
         MigrationBanner(title: VectorL10n.migrationBannerTitle,
                         message: VectorL10n.migrationBannerBody,
-                        buttonTitle: VectorL10n.migrationBannerDownloadButton) { }
+                        buttonTitle: VectorL10n.migrationBannerDownloadButton,
+                        downloadAction: { },
+                        closeAction: { })
             .theme(.dark)
             .preferredColorScheme(.dark)
             .previewDisplayName("Dark")

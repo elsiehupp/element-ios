@@ -19,3 +19,9 @@ import Foundation
     /// Dismiss the given banner view, only if it is the one currently displayed.
     func dismissBannerView(_ bannerView: UIView, animated: Bool)
 }
+
+extension Notification.Name {
+    /// Posted by a `BannerPresentationProtocol` implementation once its banner slot becomes free,
+    /// so that a banner previously rejected because of its lower priority can be presented.
+    static let bannerPresenterDidFreeBannerSlot = Notification.Name("BannerPresenterDidFreeBannerSlot")
+}

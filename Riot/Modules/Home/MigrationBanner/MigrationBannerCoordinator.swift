@@ -26,6 +26,8 @@ final class MigrationBannerCoordinator: Coordinator {
     private var bannerView: MigrationBannerView?
     private var bannerHostingController: VectorHostingController?
     private var wellKnownRefreshOperation: MXHTTPOperation?
+    /// Whether the user closed the banner. Only kept in memory for now: the banner comes back on the next app launch.
+    private var isDismissedByUser = false
     
     // MARK: Public
     
@@ -56,17 +58,27 @@ final class MigrationBannerCoordinator: Coordinator {
     func start() {
         NotificationCenter.default.addObserver(self, selector: #selector(sessionStateDidChange(_:)), name: .mxSessionStateDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(bannerSlotDidBecomeFree(_:)), name: .bannerPresenterDidFreeBannerSlot, object: nil)
+
         updateBanner()
     }
-    
+
     // MARK: - Private methods
-    
+
     @objc private func sessionStateDidChange(_ notification: Notification) {
         guard let session = notification.object as? MXSession, session === sessionProvider() else {
             return
         }
-        
+
+        updateBanner()
+    }
+
+    @objc private func bannerSlotDidBecomeFree(_ notification: Notification) {
+        guard let presenter = notification.object as AnyObject?, presenter === (bannerPresenter as AnyObject) else {
+            return
+        }
+
+        // Another banner (e.g. the verification one) has been dismissed: present this one if needed.
         updateBanner()
     }
     
@@ -89,28 +101,49 @@ final class MigrationBannerCoordinator: Coordinator {
     private func updateBanner() {
         guard let session = sessionProvider(),
               session.state != .closed,
+              !isDismissedByUser,
               BuildSettings.replacementApp != nil,
               session.vc_homeserverConfiguration().migrationBanner.isEnabled else {
             dismissBannerIfNeeded()
             return
         }
-        
+
         presentBannerIfNeeded()
     }
-    
+
+    private func handleCloseAction() {
+        isDismissedByUser = true
+        dismissBannerIfNeeded()
+
+        // The banner slot is free again: let the verification banner be displayed if the device isn't verified.
+        if let session = sessionProvider() {
+            AppDelegate.theDelegate().checkCrossSigning(for: session)
+        }
+    }
+
     private func presentBannerIfNeeded() {
+        if let bannerView = bannerView, bannerView.superview == nil {
+            // The banner has been replaced by another one with a higher priority, forget it so it can be presented again.
+            self.bannerView = nil
+            self.bannerHostingController = nil
+        }
+
         guard bannerView == nil, let replacementApp = BuildSettings.replacementApp else {
             return
         }
         
         let banner = MigrationBanner(title: VectorL10n.migrationBannerTitle,
                                      message: VectorL10n.migrationBannerBody,
-                                     buttonTitle: VectorL10n.migrationBannerDownloadButton) { [weak self] in
-            guard let self = self else { return }
-            Task { @MainActor in
-                await ReplacementAppStorePresenter.presentStorePage(appStoreID: replacementApp.productID, from: self.rootViewController)
-            }
-        }
+                                     buttonTitle: VectorL10n.migrationBannerDownloadButton,
+                                     downloadAction: { [weak self] in
+                                         guard let self = self else { return }
+                                         Task { @MainActor in
+                                             await ReplacementAppStorePresenter.presentStorePage(appStoreID: replacementApp.productID, from: self.rootViewController)
+                                         }
+                                     },
+                                     closeAction: { [weak self] in
+                                         self?.handleCloseAction()
+                                     })
         
         let hostingController = VectorHostingController(rootView: banner)
         let bannerView = MigrationBannerView()

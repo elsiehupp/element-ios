@@ -56,6 +56,14 @@ class AllChatsViewController: HomeViewController {
         didSet {
             bannerView?.translatesAutoresizingMaskIntoConstraints = false
             set(tableHeadeView: bannerView)
+
+            if bannerView == nil {
+                // Notify asynchronously: a banner presented from the observer would be set from within this observer.
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self, self.bannerView == nil else { return }
+                    NotificationCenter.default.post(name: .bannerPresenterDidFreeBannerSlot, object: self)
+                }
+            }
         }
     }
     
@@ -800,17 +808,18 @@ extension AllChatsViewController: SpaceMembersCoordinatorDelegate {
 // MARK: - BannerPresentationProtocol
 extension AllChatsViewController: BannerPresentationProtocol {
     /// The priority of the banners sharing the single banner slot. A banner never replaces a banner with a higher priority.
+    /// The migration banner comes first: the verification banner is displayed once the user has closed it.
     private enum BannerPriority: Int, Comparable {
         case versionCheck
-        case migration
         case verificationRequired
-        
+        case migration
+
         init(bannerView: UIView) {
             switch bannerView {
-            case is VerificationRequiredBannerView:
-                self = .verificationRequired
             case is MigrationBannerView:
                 self = .migration
+            case is VerificationRequiredBannerView:
+                self = .verificationRequired
             default:
                 self = .versionCheck
             }
