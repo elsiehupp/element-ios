@@ -13,6 +13,7 @@ import Foundation
 struct VectorWellKnown {
     let encryption: VectorWellKnownEncryptionConfiguration?
     let jitsi: VectorWellKnownJitsiConfiguration?
+    let migrationBanner: VectorWellKnownMigrationBannerConfiguration?
     
     // Deprecated properties
     let deprecatedEncryption: VectorWellKnownEncryptionConfiguration?
@@ -25,6 +26,7 @@ extension VectorWellKnown: Decodable {
     enum CodingKeys: String, CodingKey {
         case encryption = "io.element.e2ee"
         case jitsi = "io.element.jitsi"
+        case migrationBanner = "io.element.migration_banner"
         // Deprecated keys
         case deprecatedEncryption = "im.vector.riot.e2ee"
         case deprecatedJitsi = "im.vector.riot.jitsi"
@@ -69,4 +71,20 @@ struct VectorWellKnownJitsiConfiguration: Decodable {
     let preferredDomain: String?
     /// Override native calling with Jitsi for 1:1 calls.
     let useFor1To1Calls: Bool?
+}
+
+// MARK: - Migration Banner
+
+/// Raw content of the `io.element.migration_banner` Well Known section, used to configure the banner
+/// inviting users to migrate to the new app.
+///
+/// The resolution of the default values is done by `HomeserverConfigurationBuilder`.
+struct VectorWellKnownMigrationBannerConfiguration: Decodable {
+    /// Indicate if the banner should be displayed. `nil` when not provided (defaults to enabled).
+    let isEnabled: Bool?
+    
+    /// JSON keys associated to `VectorWellKnownMigrationBannerConfiguration`
+    enum CodingKeys: String, CodingKey {
+        case isEnabled = "enabled"
+    }
 }
